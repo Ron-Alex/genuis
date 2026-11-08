@@ -19,7 +19,7 @@ NESSIE_API_KEY=your_nessie_key
 NESSIE_CUSTOMER_ID=the_customer_to_display
 NESSIE_BASE_URL=https://prod-api.nessieisreal.com
 OPENROUTER_API_KEY=your_openrouter_key
-OPENROUTER_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
+OPENROUTER_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
 ```
 
 Use the customer ID and API base URL for the Nessie instance that issued your key. The supplied SDK contains a legacy HTTP base URL; this app uses a configurable HTTPS endpoint. The default production URL has not been tested with your credentials. Only the configured customer's accounts are loaded. No live records are created, changed, or deleted.

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { accountSchema, type BankSnapshot } from "../contracts";
 import { demoSnapshot } from "../demo";
 

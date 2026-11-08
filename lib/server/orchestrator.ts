@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { planSchema, querySchema, widgetSchema, type BankSnapshot, type ChangePlan, type Dashboard, type DataQuery, type RunEvent, type RunResult } from "../contracts";
 import { executeQuery } from "../query";
 import { checkComponent } from "./components";

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { bundleComponent } from "@/lib/server/components";
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
