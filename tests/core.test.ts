@@ -6,6 +6,7 @@ import { executeQuery } from "../lib/query";
 import { runAgents } from "../lib/server/orchestrator";
 import { bundleComponent, checkComponent } from "../lib/server/components";
 import { loadBankSnapshot } from "../lib/server/nessie";
+import { runAgentGraph } from "../lib/server/agent-graph";
 
 test("financial aggregation uses cents and excludes pending/cancelled purchases", () => {
   const snapshot = demoSnapshot();
@@ -20,6 +21,19 @@ test("date/category filters are inclusive and month series are chronological", (
 });
 test("queries cannot escape the selected customer's accounts", () => {
   assert.throws(() => executeQuery(demoSnapshot(), { source: "purchases", groupBy: "month", accountId: "other-customer" }), /not part/);
+});
+test("graph stops after six unsuccessful finish decisions", async () => {
+  const originalFetch = globalThis.fetch, key = process.env.OPENROUTER_API_KEY;
+  process.env.OPENROUTER_API_KEY = "test-key";
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return Response.json({ choices: [{ message: { content: JSON.stringify({ action: "finish", plan: { operation: "add", title: "Chart", explanation: "Chart", kind: "bar" }, query: { source: "purchases", groupBy: "month" } }) } }] });
+  };
+  try {
+    await assert.rejects(() => runAgentGraph("Chart", structuredClone(initialDashboard), demoSnapshot(), {}, () => {}), /step limit/);
+    assert.equal(calls, 6);
+  } finally { globalThis.fetch = originalFetch; if (key === undefined) delete process.env.OPENROUTER_API_KEY; else process.env.OPENROUTER_API_KEY = key; }
 });
 test("invalid ranges are rejected and empty data returns zero", () => {
   assert.equal(querySchema.safeParse({ from: "2026-11-01", to: "2026-09-01" }).success, false);
