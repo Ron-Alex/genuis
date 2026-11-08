@@ -34,11 +34,11 @@ const merchants = await request("/merchants");
 if (!Array.isArray(merchants) || merchants.length === 0) throw new Error("No existing merchants found; no purchases were created.");
 
 const samples = [
-  { amount: 18.47, description: "Mock data: coffee and breakfast", daysAgo: 2 },
-  { amount: 62.13, description: "Mock data: household supplies", daysAgo: 5 },
-  { amount: 34.9, description: "Mock data: lunch", daysAgo: 8 },
-  { amount: 91.25, description: "Mock data: groceries", daysAgo: 12 },
-  { amount: 14.6, description: "Mock data: transit", daysAgo: 16 },
+  { amount: 18.47, description: "Mock data: stuff and breakfast", daysAgo: 128 },
+  { amount: 62.13, description: "Mock data: cleaning supplies", daysAgo: 132 },
+  { amount: 34.9, description: "Mock data: taco bell", daysAgo: 137 },
+  { amount: 91.25, description: "Mock data: cheese", daysAgo: 126 },
+  { amount: 14.6, description: "Mock data: insurance", daysAgo: 133 },
 ];
 console.log(`Customer: ${customerId}; account: ${account._id}; creating ${samples.length} mock purchases.`);
 for (const [index, sample] of samples.entries()) {

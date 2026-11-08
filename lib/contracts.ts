@@ -41,6 +41,19 @@ export type QueryResult = {
   total: number; count: number; query: DataQuery; description: string;
 };
 
+export const metricSchema = z.object({
+  id: z.string().min(1).max(120), type: z.enum(["period_comparison", "category_contribution", "share", "budget_progress"]),
+  evidenceIds: z.array(z.string()).min(1).max(10), values: z.record(z.string(), z.number()), units: z.enum(["USD", "percent", "count"]),
+  periods: z.array(z.string()).max(4).default([]), filters: querySchema,
+});
+export const evidenceSchema = z.object({ id: z.string().min(1).max(100), query: querySchema, result: z.object({ rows: z.array(z.object({ label:z.string(),value:z.number(),count:z.number() })).max(1000),total:z.number(),count:z.number(),query:querySchema,description:z.string() }), snapshotFingerprint:z.string(), fetchedAt:z.string(), executedAt:z.string(), coverage:z.array(z.string()).default([]) });
+export const insightSchema = z.object({ id:z.string().min(1).max(100), claimType:metricSchema.shape.type, metricIds:z.array(z.string()).min(1).max(4), relevance:z.string().max(240), limitations:z.array(z.string().max(240)).max(5).default([]), followUp:z.object({type:z.enum(["category_drilldown","merchant_drilldown"]),label:z.string().max(80),category:z.string().max(100).optional()}).optional() });
+export const analysisSchema = z.object({ id:z.string(),createdAt:z.string(),snapshotFingerprint:z.string(),queryFingerprint:z.string(),status:z.enum(["ready","insufficient_data","stale"]),insights:z.array(insightSchema).max(3),evidence:z.array(evidenceSchema).max(8),metrics:z.array(metricSchema).max(16),budgetTarget:z.number().positive().optional() });
+export type Evidence = z.infer<typeof evidenceSchema>;
+export type Metric = z.infer<typeof metricSchema>;
+export type Insight = z.infer<typeof insightSchema>;
+export type WidgetAnalysis = z.infer<typeof analysisSchema>;
+
 export const widgetSchema = z.object({
   id: z.string().min(1).max(100),
   title: z.string().min(1).max(100),
@@ -50,6 +63,7 @@ export const widgetSchema = z.object({
   accent: z.enum(["purple", "mint", "blue", "orange"]).default("purple"),
   budget: z.number().positive().max(1e9).optional(),
   code: z.string().max(18000).optional(),
+  analysis: analysisSchema.optional(),
 });
 export type Widget = z.infer<typeof widgetSchema>;
 export const dashboardSchema = z.object({
@@ -61,6 +75,7 @@ export type Dashboard = z.infer<typeof dashboardSchema>;
 export const runRequestSchema = z.object({
   prompt: z.string().trim().min(3).max(2000),
   dashboard: dashboardSchema,
+  investigation: z.object({widgetId:z.string().max(100),type:z.enum(["category_drilldown","merchant_drilldown"]),insightId:z.string().max(100)}).optional(),
 });
 export type RunEvent = {
   stage: "planner" | "data" | "builder" | "validation" | "complete" | "error";

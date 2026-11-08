@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node scripts/test.mjs"
-    ,"seed:nessie": "node scripts/seed-nessie-purchases.mjs"
+    "test": "node scripts/test.mjs",
+    "seed:nessie": "node scripts/seed-nessie-purchases.mjs",
+    "seed:nessie:all": "node scripts/seed-nessie-transactions.mjs"
   },
   "dependencies": {
     "esbuild": "^0.28.2",

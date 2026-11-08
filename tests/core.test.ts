@@ -27,7 +27,7 @@ test("invalid ranges are rejected and empty data returns zero", () => {
   assert.equal(result.total, 0); assert.equal(result.count, 0); assert.deepEqual(result.rows, []);
 });
 test("demo loop produces a budget widget without mutating the existing dashboard", async () => {
-  const key = process.env.NVIDIA_API_KEY; delete process.env.NVIDIA_API_KEY;
+  const key = process.env.OPENROUTER_API_KEY; delete process.env.OPENROUTER_API_KEY;
   try {
     const events: RunEvent[] = [], dashboard = structuredClone(initialDashboard);
     const result = await runAgents("Build a restaurant budget with a $300 target for October", dashboard, demoSnapshot(), e => events.push(e));
@@ -36,25 +36,25 @@ test("demo loop produces a budget widget without mutating the existing dashboard
     assert.equal(widget.kind, "budget"); assert.equal(widget.budget, 300); assert.equal(widget.query.category, "Restaurants");
     assert.equal(widget.query.from, "2026-10-01"); assert.equal(widget.query.to, "2026-10-31");
     assert.equal(result.engine, "demo"); assert.ok(events.some(e => e.stage === "validation"));
-  } finally { if (key === undefined) delete process.env.NVIDIA_API_KEY; else process.env.NVIDIA_API_KEY = key; }
+  } finally { if (key === undefined) delete process.env.OPENROUTER_API_KEY; else process.env.OPENROUTER_API_KEY = key; }
 });
 test("theme changes preserve widgets and their queries", async () => {
-  const key = process.env.NVIDIA_API_KEY; delete process.env.NVIDIA_API_KEY;
+  const key = process.env.OPENROUTER_API_KEY; delete process.env.OPENROUTER_API_KEY;
   try {
     const result = await runAgents("High contrast theme and larger text", structuredClone(initialDashboard), demoSnapshot(), () => {});
     assert.equal(result.dashboard.theme, "contrast"); assert.equal(result.dashboard.largeText, true);
     assert.deepEqual(result.dashboard.widgets, initialDashboard.widgets);
-  } finally { if (key === undefined) delete process.env.NVIDIA_API_KEY; else process.env.NVIDIA_API_KEY = key; }
+  } finally { if (key === undefined) delete process.env.OPENROUTER_API_KEY; else process.env.OPENROUTER_API_KEY = key; }
 });
 test("novel component path compiles real JSX and bundles React without execution", async () => {
-  const key = process.env.NVIDIA_API_KEY; delete process.env.NVIDIA_API_KEY;
+  const key = process.env.OPENROUTER_API_KEY; delete process.env.OPENROUTER_API_KEY;
   try {
     const result = await runAgents("Generate a custom restaurant tracker for October", structuredClone(initialDashboard), demoSnapshot(), () => {});
     const component = result.dashboard.widgets.at(-1)!;
     assert.equal(component.kind, "custom"); assert.ok(component.code);
     const script = await bundleComponent(component.code!);
     assert.ok(script.length > 10000); assert.ok(script.includes("genuis-widget-ready"));
-  } finally { if (key === undefined) delete process.env.NVIDIA_API_KEY; else process.env.NVIDIA_API_KEY = key; }
+  } finally { if (key === undefined) delete process.env.OPENROUTER_API_KEY; else process.env.OPENROUTER_API_KEY = key; }
 });
 test("component gate rejects syntax errors, imports, raw HTML and networking", async () => {
   for (const source of ["function GeneratedWidget(){ return <div> }", "import x from 'fs'; function GeneratedWidget(){return null}", "function GeneratedWidget(){fetch('https://bad.test');return null}", "function GeneratedWidget(){return <div dangerouslySetInnerHTML={{__html:'bad'}}/>}"]) {
@@ -62,28 +62,29 @@ test("component gate rejects syntax errors, imports, raw HTML and networking", a
   }
 });
 test("configured Nemotron repairs invalid structured output and never uses demo logic", async () => {
-  const originalFetch = globalThis.fetch, key = process.env.NVIDIA_API_KEY;
-  process.env.NVIDIA_API_KEY = "test-key";
+  const originalFetch = globalThis.fetch, key = process.env.OPENROUTER_API_KEY;
+  process.env.OPENROUTER_API_KEY = "test-key";
   let calls = 0;
-  const outputs = ["not-json", JSON.stringify({ operation: "theme", title: "Theme", explanation: "Updated", theme: "dark", kind: "bar" })];
+  const outputs = ["not-json", JSON.stringify({ action: "finish", plan: { operation: "theme", title: "Theme", explanation: "Updated", theme: "dark", kind: "bar" } })];
   globalThis.fetch = async () => new Response(JSON.stringify({ choices: [{ message: { content: outputs[calls++] } }] }), { headers: { "Content-Type": "application/json" } });
   try {
     const result = await runAgents("Dark theme", structuredClone(initialDashboard), demoSnapshot(), () => {});
     assert.equal(result.engine, "nemotron"); assert.equal(result.dashboard.theme, "dark"); assert.equal(calls, 2);
-  } finally { globalThis.fetch = originalFetch; if (key === undefined) delete process.env.NVIDIA_API_KEY; else process.env.NVIDIA_API_KEY = key; }
+  } finally { globalThis.fetch = originalFetch; if (key === undefined) delete process.env.OPENROUTER_API_KEY; else process.env.OPENROUTER_API_KEY = key; }
 });
 test("Nemotron endpoint errors do not silently fall back to a fake success", async () => {
-  const originalFetch = globalThis.fetch, key = process.env.NVIDIA_API_KEY;
-  process.env.NVIDIA_API_KEY = "test-key"; globalThis.fetch = async () => new Response("Unauthorized", { status: 401 });
-  try { await assert.rejects(() => runAgents("Add a chart", structuredClone(initialDashboard), demoSnapshot(), () => {}), /401/); }
-  finally { globalThis.fetch = originalFetch; if (key === undefined) delete process.env.NVIDIA_API_KEY; else process.env.NVIDIA_API_KEY = key; }
+  const originalFetch = globalThis.fetch, key = process.env.OPENROUTER_API_KEY;
+  process.env.OPENROUTER_API_KEY = "test-key"; globalThis.fetch = async () => new Response("Unauthorized", { status: 401 });
+  try { await assert.rejects(() => runAgents("Add a chart", structuredClone(initialDashboard), demoSnapshot(), () => {}), /could not be reached/); }
+  finally { globalThis.fetch = originalFetch; if (key === undefined) delete process.env.OPENROUTER_API_KEY; else process.env.OPENROUTER_API_KEY = key; }
 });
-test("three Nemotron roles hand off a real query and UI specification", async () => {
-  const originalFetch = globalThis.fetch, key = process.env.NVIDIA_API_KEY;
-  process.env.NVIDIA_API_KEY = "test-key";
+test("Dashboard agent observes a query before handing the view to the UI builder", async () => {
+  const originalFetch = globalThis.fetch, key = process.env.OPENROUTER_API_KEY;
+  process.env.OPENROUTER_API_KEY = "test-key";
+  const query = { source: "purchases", groupBy: "merchant", category: "Restaurants", from: "2026-10-01", to: "2026-10-31" };
   const outputs = [
-    { operation: "add", title: "Dining in October", explanation: "Created your restaurant breakdown.", kind: "bar" },
-    { source: "purchases", groupBy: "merchant", category: "Restaurants", from: "2026-10-01", to: "2026-10-31" },
+    { action: "query", query },
+    { action: "finish", plan: { operation: "add", title: "Dining in October", explanation: "Created your restaurant breakdown.", kind: "bar" }, query },
     { title: "Dining in October", subtitle: "Restaurant purchases by merchant", accent: "mint" },
   ];
   const roles: string[] = [];
@@ -98,8 +99,8 @@ test("three Nemotron roles hand off a real query and UI specification", async ()
     assert.equal(result.engine, "nemotron"); assert.equal(widget.accent, "mint");
     assert.equal(executeQuery(demoSnapshot(), widget.query).count, 6);
     assert.equal(roles.length, 3);
-    assert.match(roles[0], /Planner/); assert.match(roles[1], /Data agent/); assert.match(roles[2], /UI builder/);
-  } finally { globalThis.fetch = originalFetch; if (key === undefined) delete process.env.NVIDIA_API_KEY; else process.env.NVIDIA_API_KEY = key; }
+    assert.match(roles[0], /Dashboard agent/); assert.match(roles[1], /Dashboard agent/); assert.match(roles[2], /UI builder/);
+  } finally { globalThis.fetch = originalFetch; if (key === undefined) delete process.env.OPENROUTER_API_KEY; else process.env.OPENROUTER_API_KEY = key; }
 });
 test("Nessie adapter scopes requests and normalizes SDK-shaped records", async () => {
   const originalFetch = globalThis.fetch;
