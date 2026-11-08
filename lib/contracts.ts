@@ -5,8 +5,8 @@ export const querySchema = z.object({
   groupBy: z.enum(["category", "merchant", "month", "day", "account", "none"]).default("category"),
   category: z.string().max(100).optional(),
   search: z.string().max(100).optional(),
-  from: z.iso.date().optional(),
-  to: z.iso.date().optional(),
+  from: z.string().date().optional(),
+  to: z.string().date().optional(),
   accountId: z.string().max(100).optional(),
 }).refine(q => !q.from || !q.to || q.from <= q.to, "Start date must precede end date");
 export type DataQuery = z.infer<typeof querySchema>;

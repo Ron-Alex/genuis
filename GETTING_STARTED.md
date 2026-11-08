@@ -18,19 +18,18 @@ If `.env` already exists, edit it instead of copying over it. Add your credentia
 NESSIE_API_KEY=your_nessie_key
 NESSIE_CUSTOMER_ID=the_customer_to_display
 NESSIE_BASE_URL=https://prod-api.nessieisreal.com
-NVIDIA_API_KEY=your_nvidia_key
-NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
-NVIDIA_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
+OPENROUTER_API_KEY=your_openrouter_key
+OPENROUTER_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
 ```
 
 Use the customer ID and API base URL for the Nessie instance that issued your key. The supplied SDK contains a legacy HTTP base URL; this app uses a configurable HTTPS endpoint. The default production URL has not been tested with your credentials. Only the configured customer's accounts are loaded. No live records are created, changed, or deleted.
 
-For Brev, point `NVIDIA_BASE_URL` to the inference server's OpenAI-compatible `/v1` base and set `NVIDIA_MODEL` to its served model name. `NVIDIA_API_KEY` must be set to enable model mode; use the actual endpoint credential. A private local server that does not require authentication can use a nonempty placeholder. Do not place credentials in any `NEXT_PUBLIC_` variable.
+`OPENROUTER_API_KEY` enables Nemotron through OpenRouter; `OPENROUTER_MODEL` can select another OpenRouter model slug. Do not place credentials in any `NEXT_PUBLIC_` variable.
 
 ## Demo modes
 
 - No Nessie key: deterministic sample banking fixtures, visibly labeled **Sample data**.
-- No NVIDIA key: a limited rule-based **Demo planner**, visibly labeled as having no model connected. This is for exercising the UI and does not demonstrate model intelligence.
+- No OpenRouter key: a limited rule-based **Demo planner**, visibly labeled as having no model connected. This is for exercising the UI and does not demonstrate model intelligence.
 - Either connection can be enabled independently.
 - A configured key that fails does **not** silently fall back to fixtures or fake model output.
 - `NESSIE_DEMO_MODE=true` deliberately selects fixtures even with a Nessie key. `false` requires Nessie configuration.

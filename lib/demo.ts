@@ -16,7 +16,7 @@ export function demoSnapshot(): BankSnapshot {
       return { id: `demo-${month}-${i}`, accountId: i % 4 === 0 ? "demo-credit" : "demo-checking", date: `2026-${String(month).padStart(2, "0")}-${String(1 + (i * 3) % 28).padStart(2, "0")}`, merchant, category, amount, status: "completed" };
     }));
   return {
-    mode: "demo", engine: process.env.NVIDIA_API_KEY ? "nemotron" : "demo", customer: "Alex Morgan",
+    mode: "demo", engine: process.env.OPENROUTER_API_KEY ? "nemotron" : "demo", customer: "Alex Morgan",
     accounts: [
       { _id: "demo-checking", nickname: "Everyday checking", type: "Checking", balance: 4280.65 },
       { _id: "demo-savings", nickname: "A little more freedom", type: "Savings", balance: 12650 },

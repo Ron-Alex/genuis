@@ -7,7 +7,7 @@ export class PublicError extends Error {
 }
 export function configuration() {
   const demo = process.env.NESSIE_DEMO_MODE === "true" || (!process.env.NESSIE_API_KEY && process.env.NESSIE_DEMO_MODE !== "false");
-  return { demo, engine: process.env.NVIDIA_API_KEY ? "nemotron" as const : "demo" as const };
+  return { demo, engine: process.env.OPENROUTER_API_KEY ? "nemotron" as const : "demo" as const };
 }
 
 async function get(path: string, signal?: AbortSignal): Promise<unknown> {
